@@ -1,0 +1,94 @@
+hmmgcc -- Hidden Markov Model GC Content
+
+This directory contains all the files necessary to perform HMM-based searches
+for regions of different GC content in a (relatively small) genome.  This
+distribution should compile cleanly on all UNIX distributions; simply type 
+"make" in this directory to do so.  If you wish to use gcc explicitly, add 
+optimization flags, change the directory "make install" installs to, or add 
+other compiler options, simply edit the Makefile.  
+
+The program is invoked with the command "hmmgcc".  The usage statement which is
+printed when no parameters are provided is given below:
+
+USAGE: hmmgcc [ -l length ] [ -v | -p cutoff | -P range-file | -a ] seq-file \
+hmm-file
+        -v      Viterbi mode -- print Viterbi state sequence (DEFAULT)
+        -p      Posterior cutoff mode -- uses provided cutoff (ln P)
+        -P      Posterior "greedy" mode -- uses highest possible cutoff to
+                include all areas specified in the range file
+        -a      Posterior "print all" mode -- prints decoding for all nts
+        -l      All members of state looking for must be at least l long
+
+The seq-file and hmm-file parameters are required.  seq-file is the 
+filename for a DNA sequence (or sequences) in FASTA format.  hmm-file is the 
+hidden Markov model file (see below).
+
+The program has four decoding modes, as follows:
+
+Viterbi mode is invoked by default, or can be explicitly called with the -v 
+parameter.  In this mode, Viterbi decoding is performed, and the program prints
+to standard output every region called as being produced by the high GC state. 
+
+Posterior cutoff mode is invoked with the -p parameter, followed by a cutoff.
+In this mode, posterior decoding is performed to identify the probability that 
+each nucleotide was produced by the high GC state.  Only those nucleotides for 
+which the natural logarithm of this probability is greater than the cutoff 
+specified on the command line are reported as being GC-rich.  Specifically, the
+program reports ranges of consecutive nucleotides for which ln P > cutoff.
+
+Posterior "greedy" mode is invoked with the -P parameter, followed by a 
+filename.  This mode also utilizes posterior decoding.  The file specified 
+contains a list of ranges in the following format:
+name	start-stop
+where name is the name of the sequence from the fasta file, and start and stop 
+are the start and stop positions of a region that you want to guarantee is 
+called as being GC-rich.  The program reads in this list, and finds the highest
+probability P such that the probability of being produced by the GC-rich state
+for each nucleotide listed in the list of ranges is greater than or equal 
+to P.  This probability P is then taken as the cutoff probability, and results 
+are reported as for the standard posterior decoding mode.
+
+Posterior "print all" mode is invoked with the -a parameter.  This mode simply 
+reports every nucleotide and the log-probability (natural logarithm) that it 
+was produced by the GC-rich state.
+
+Finally, the -l option can be used with any mode but the "Posterior 'print 
+all'" mode.  This option is followed by an integer.  When used, only those 
+regions whose length is greater than or equal to the integer specified are 
+reported.  This is useful in eliminating spurious, short GC-rich regions that 
+probably are too short to be noncoding RNAs.
+
+This directory also contains sample HMM files (ending in .hmm) and range files
+(for the Posterior "greedy" mode) (ending in .range).  If you wish to modify 
+the hmm parameters for your own use, simply copy an HMM file and change the 
+numbers as the comments on each line tells you.  Note that each line must 
+begin with either a # or a number.
+
+To replicate the searches done in the paper, first download the appropriate 
+Methanococcus or Pyrococcus genome.  The Viterbi decoding can be performed as 
+follows:
+
+hmmgcc -l 50 <genome file> <hmm file>
+
+where the following hmm files may be used:
+	example.hmm		Commented example file, should you wish
+				to design your own HMM
+	mj.hmm			Methanococcus jannaschii
+	pf.hmm			Pyrococcus furiosus
+	pa.hmm			Pyrococcus abyssi
+	ph.hmm			Pyrococcus horikoshii
+
+The searches of the Pyrococcus genomes with posterior decoding and a cutoff 
+that guarantees all tRNAs are found can be performed using:
+
+hmmgcc -l 50 -P px.range <genome file> px.hmm
+
+where x is either f, a, or h depending on which Pyrococcus genome is being 
+searched.  If you are going to use this approach, I recommend double-checking 
+that you have the same version of the genome that we used; otherwise, the 
+.range file provided may list nucleotides not in the tRNA genes (or be missing 
+nucleotides from the tRNA genes), which will change the results.  Also 
+double-check that the sequence name in the fasta file matches that in the 
+.range file.
+
+

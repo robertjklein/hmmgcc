@@ -1,0 +1,26 @@
+# Example HMM file
+# To use for your own organism, simply replace the parameters with the ones
+# you want.  The rest of each line after the "#" symbol are ignored
+# 
+# Blank lines are not allowed, unless preced by a "#"
+#
+0.004203           # P starting in GC
+0.995797           # P starting in AT
+#
+#
+0.177253             # P of A in GC
+0.322747             # P of C in GC
+0.322747             # P of G in GC
+0.177253             # P of T in GC
+#
+0.343526             # P of A in AT
+0.156474             # P of C in AT
+0.156474             # P of G in AT
+0.343526             # P of T in AT
+#
+#
+0.99            # P of GC to GC trans
+0.01            # P of GC to AT trans
+#
+0.000022          # P of AT to GC trans
+0.999978          # P of AT to AT trans
